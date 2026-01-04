@@ -145,23 +145,21 @@ const WeatherCard = memo(({ city, onDelete, index }) => {
       <div className="card-inner-modern">
         {/* Front Side */}
         <div className="card-front-modern">
-          {/* Top Section */}
-          <div className="card-top-modern">
+          {/* Left Side - Temperature Display */}
+          <div className="card-left-section">
             <div className="location-badge-modern">
               <span className="location-icon-modern">📍</span>
-              <h2 className="city-name-modern">{city.cityName}</h2>
-              {city.country && <span className="country-flag-modern">{city.country}</span>}
+              <div>
+                <h2 className="city-name-modern">{city.cityName}</h2>
+                {city.country && <span className="country-flag-modern">{city.country}</span>}
+              </div>
             </div>
             
-            {/* Main Temperature Circle */}
-            <div className="temp-circle-modern">
-              <div className="temp-value-modern">{convertTemp(city.temperature)}&deg;</div>
-              <div className="temp-unit-modern">{temperatureUnit === 'C' ? 'Celsius' : 'Fahrenheit'}</div>
+            <div className="temp-display-large">
+              <div className="temp-value-large">{convertTemp(city.temperature)}</div>
+              <div className="temp-unit-large">&deg;{temperatureUnit}</div>
             </div>
-          </div>
-
-          {/* Middle Section */}
-          <div className="card-middle-modern">
+            
             <div className="condition-display-modern">
               <span className="condition-emoji-modern">{conditionEmoji}</span>
               <div className="condition-text-modern">
@@ -169,27 +167,41 @@ const WeatherCard = memo(({ city, onDelete, index }) => {
                 <span className="condition-desc-modern">{city.description}</span>
               </div>
             </div>
-            
-            <div className="feels-like-modern">
-              Feels like <strong>{city.feelsLike}°C</strong>
-            </div>
           </div>
 
-          {/* Bottom Section - Quick Stats */}
-          <div className="card-bottom-modern">
-            <div className="quick-stat-modern">
-              <span className="stat-icon-modern">💧</span>
-              <div className="stat-info-modern">
-                <span className="stat-value-modern">{city.humidity}%</span>
-                <span className="stat-label-modern">Humidity</span>
+          {/* Right Side - Weather Stats */}
+          <div className="card-right-section">
+            <div className="stats-grid">
+              <div className="stat-item">
+                <span className="stat-icon-modern">🌡️</span>
+                <div className="stat-content">
+                  <span className="stat-label-modern">Feels Like</span>
+                  <span className="stat-value-modern">{city.feelsLike}°C</span>
+                </div>
               </div>
-            </div>
-            <div className="quick-stat-divider-modern"></div>
-            <div className="quick-stat-modern">
-              <span className="stat-icon-modern">💨</span>
-              <div className="stat-info-modern">
-                <span className="stat-value-modern">{city.windSpeed}</span>
-                <span className="stat-label-modern">m/s</span>
+              
+              <div className="stat-item">
+                <span className="stat-icon-modern">💧</span>
+                <div className="stat-content">
+                  <span className="stat-label-modern">Humidity</span>
+                  <span className="stat-value-modern">{city.humidity}%</span>
+                </div>
+              </div>
+              
+              <div className="stat-item">
+                <span className="stat-icon-modern">💨</span>
+                <div className="stat-content">
+                  <span className="stat-label-modern">Wind Speed</span>
+                  <span className="stat-value-modern">{city.windSpeed} m/s</span>
+                </div>
+              </div>
+              
+              <div className="stat-item">
+                <span className="stat-icon-modern">🎚️</span>
+                <div className="stat-content">
+                  <span className="stat-label-modern">Pressure</span>
+                  <span className="stat-value-modern">{city.pressure} hPa</span>
+                </div>
               </div>
             </div>
           </div>

@@ -1698,15 +1698,6 @@ body {
 }
 
 /* ============================================
-   CAROUSEL CONTAINER
-   ============================================ */
-
-.carousel-container {
-  flex: 1;
-  animation: fadeIn 1s ease 0.4s backwards;
-}
-
-/* ============================================
    STATS BAR
    ============================================ */
 
@@ -1811,75 +1802,6 @@ body {
   .stats-bar {
     grid-template-columns: 1fr;
   }
-}
-
-.carousel-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-lg);
-  padding: var(--spacing-md);
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(20, 184, 166, 0.15);
-}
-
-.carousel-title {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.carousel-title h2 {
-  font-size: 1.8rem;
-  font-weight: 600;
-  background: linear-gradient(135deg, #14b8a6, #0ea5e9);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.city-count {
-  padding: 6px 14px;
-  background: linear-gradient(135deg, rgba(20, 184, 166, 0.2), rgba(14, 165, 233, 0.2));
-  border: 1px solid rgba(20, 184, 166, 0.3);
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #14b8a6;
-  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.2);
-}
-
-.refresh-button {
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: linear-gradient(135deg, rgba(20, 184, 166, 0.15), rgba(14, 165, 233, 0.15));
-  border: 1px solid rgba(20, 184, 166, 0.3);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: 0.9rem;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  transition: all var(--transition-normal);
-}
-
-.refresh-button:hover {
-  background: linear-gradient(135deg, rgba(20, 184, 166, 0.25), rgba(14, 165, 233, 0.25));
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(20, 184, 166, 0.3);
-}
-
-.refresh-icon {
-  font-size: 1.1rem;
-  transition: transform 0.5s ease;
-}
-
-.refresh-button:hover .refresh-icon {
-  transform: rotate(180deg);
 }
 
 /* Scroll Hint removed - carousel functionality removed */
