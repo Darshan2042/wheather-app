@@ -251,7 +251,7 @@ function App() {
         addToSearchHistory(cityName);
         toast.success(`${cityName} added successfully! 🌤️`, {
           position: 'top-right',
-          autoClose: 3000,
+          autoClose: 5000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
@@ -260,7 +260,7 @@ function App() {
       } else {
         toast.info(`${cityName} is already in your list!`, {
           position: 'top-right',
-          autoClose: 3000,
+          autoClose: 5000,
         });
       }
       
@@ -270,7 +270,7 @@ function App() {
       const errorMessage = err.response?.data?.message || 'Failed to add city. Please check the name and try again.';
       toast.error(errorMessage, {
         position: 'top-right',
-        autoClose: 4000,
+        autoClose: 5000,
       });
       dispatch({ type: ACTION_TYPES.SET_ERROR, payload: errorMessage });
       return { success: false, message: errorMessage };
@@ -357,7 +357,7 @@ function App() {
         {/* Toast Notification Container */}
         <ToastContainer
           position="top-right"
-          autoClose={3000}
+          autoClose={5000}
           hideProgressBar={false}
           newestOnTop={true}
           closeOnClick
@@ -367,6 +367,8 @@ function App() {
           pauseOnHover
           theme="dark"
           style={{ zIndex: 9999 }}
+          toastClassName="custom-toast"
+          progressClassName="custom-toast-progress"
         />
 
         {/* Animated particle background */}
@@ -480,9 +482,8 @@ function App() {
 
           {/* Footer */}
           <footer className="app-footer">
-            <p>Powered by OpenWeatherMap API</p>
-            <p className="footer-divider">•</p>
-            <p>Built with ❤️ using MERN Stack</p>
+            <p>🌤️ Powered by OpenWeatherMap API</p>
+            <p>Built with ❤️ using MERN Stack | © 2026 WeatherHub</p>
           </footer>
         </div>
       </div>

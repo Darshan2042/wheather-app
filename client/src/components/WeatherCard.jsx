@@ -17,8 +17,9 @@ const WeatherCard = memo(({ city, onDelete, index }) => {
   } = useContext(WeatherContext);
   
   const [isHovered, setIsHovered] = useState(false);
-  const [isFlipped, setIsFlipped] = useState(false);
   const [animationDelay, setAnimationDelay] = useState(0);
+  const [localTime, setLocalTime] = useState('');
+  const [localDate, setLocalDate] = useState('');
 
   const isSelectedForComparison = selectedForComparison.includes(city._id);
 
@@ -26,6 +27,37 @@ const WeatherCard = memo(({ city, onDelete, index }) => {
   useEffect(() => {
     setAnimationDelay(index * 0.1);
   }, [index]);
+
+  // Update local time for the city
+  useEffect(() => {
+    const updateCityTime = () => {
+      if (city.timezone !== undefined) {
+        // Get current UTC time
+        const now = new Date();
+        const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+        
+        // Calculate city's local time using timezone offset (in seconds)
+        const cityTime = new Date(utcTime + (city.timezone * 1000));
+        
+        // Format time (HH:MM AM/PM)
+        const hours = cityTime.getHours();
+        const minutes = cityTime.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const displayHours = hours % 12 || 12;
+        const displayMinutes = minutes < 10 ? '0' + minutes : minutes;
+        setLocalTime(`${displayHours}:${displayMinutes} ${ampm}`);
+        
+        // Format date
+        const options = { weekday: 'short', month: 'short', day: 'numeric' };
+        setLocalDate(cityTime.toLocaleDateString('en-US', options));
+      }
+    };
+    
+    updateCityTime();
+    const interval = setInterval(updateCityTime, 60000); // Update every minute
+    
+    return () => clearInterval(interval);
+  }, [city.timezone]);
 
   // Memoized temperature color calculation
   const temperatureColor = useMemo(() => {
@@ -57,11 +89,6 @@ const WeatherCard = memo(({ city, onDelete, index }) => {
   const handleDelete = useCallback(() => {
     onDelete(city._id, city.cityName);
   }, [city._id, city.cityName, onDelete]);
-
-  // Toggle flip animation
-  const handleFlip = useCallback(() => {
-    setIsFlipped(prev => !prev);
-  }, []);
 
   // Handle comparison toggle
   const handleComparisonToggle = useCallback((e) => {
@@ -95,7 +122,7 @@ const WeatherCard = memo(({ city, onDelete, index }) => {
 
   return (
     <div 
-      className={`weather-card-modern ${isHovered ? 'card-hovered-modern' : ''} ${isFlipped ? 'card-flipped' : ''}`}
+      className={`weather-card-modern ${isHovered ? 'card-flipped' : ''}`}
       style={{ 
         animationDelay: `${animationDelay}s`,
         boxShadow: `0 8px 32px rgba(0, 0, 0, 0.4), 0 0 40px ${temperatureColor.glow}`,
@@ -131,141 +158,84 @@ const WeatherCard = memo(({ city, onDelete, index }) => {
         </div>
       )}
 
-      {/* Info/Flip Button */}
-      <button 
-        className="info-btn-modern"
-        onClick={handleFlip}
-        aria-label={isFlipped ? "Show main info" : "Show detailed info"}
-        title={isFlipped ? "Back to main" : "View details"}
-      >
-        <span className="info-icon">{isFlipped ? '←' : 'ℹ'}</span>
-      </button>
-
       {/* Card Inner Container for flip effect */}
       <div className="card-inner-modern">
-        {/* Front Side */}
+        {/* Front Side - Main Info */}
         <div className="card-front-modern">
-          {/* Left Side - Temperature Display */}
-          <div className="card-left-section">
-            <div className="location-badge-modern">
-              <span className="location-icon-modern">📍</span>
-              <div>
-                <h2 className="city-name-modern">{city.cityName}</h2>
-                {city.country && <span className="country-flag-modern">{city.country}</span>}
-              </div>
-            </div>
-            
-            <div className="temp-display-large">
-              <div className="temp-value-large">{convertTemp(city.temperature)}</div>
-              <div className="temp-unit-large">&deg;{temperatureUnit}</div>
-            </div>
-            
-            <div className="condition-display-modern">
-              <span className="condition-emoji-modern">{conditionEmoji}</span>
-              <div className="condition-text-modern">
-                <span className="condition-name-modern">{city.condition}</span>
-                <span className="condition-desc-modern">{city.description}</span>
-              </div>
+          <div className="location-badge-modern">
+            <span className="location-icon-modern">📍</span>
+            <div>
+              <h2 className="city-name-modern">{city.cityName}</h2>
+              {city.country && <span className="country-flag-modern">{city.country}</span>}
             </div>
           </div>
 
-          {/* Right Side - Weather Stats */}
-          <div className="card-right-section">
-            <div className="stats-grid">
-              <div className="stat-item">
-                <span className="stat-icon-modern">🌡️</span>
-                <div className="stat-content">
-                  <span className="stat-label-modern">Feels Like</span>
-                  <span className="stat-value-modern">{city.feelsLike}°C</span>
-                </div>
-              </div>
-              
-              <div className="stat-item">
-                <span className="stat-icon-modern">💧</span>
-                <div className="stat-content">
-                  <span className="stat-label-modern">Humidity</span>
-                  <span className="stat-value-modern">{city.humidity}%</span>
-                </div>
-              </div>
-              
-              <div className="stat-item">
-                <span className="stat-icon-modern">💨</span>
-                <div className="stat-content">
-                  <span className="stat-label-modern">Wind Speed</span>
-                  <span className="stat-value-modern">{city.windSpeed} m/s</span>
-                </div>
-              </div>
-              
-              <div className="stat-item">
-                <span className="stat-icon-modern">🎚️</span>
-                <div className="stat-content">
-                  <span className="stat-label-modern">Pressure</span>
-                  <span className="stat-value-modern">{city.pressure} hPa</span>
-                </div>
-              </div>
+          {/* City Local Time and Date */}
+          {localTime && (
+            <div className="city-time-display">
+              <div className="time-value">🕒 {localTime}</div>
+              <div className="date-value">📅 {localDate}</div>
             </div>
+          )}
+          
+          <div className="temp-display-large">
+            <div className="temp-value-large">{convertTemp(city.temperature)}</div>
+            <div className="temp-unit-large">&deg;{temperatureUnit}</div>
+          </div>
+          
+          <div className="condition-display-modern">
+            <span className="condition-emoji-modern">{conditionEmoji}</span>
+            <div className="condition-text-modern">
+              <span className="condition-name-modern">{city.condition}</span>
+              <span className="condition-desc-modern">{city.description}</span>
+            </div>
+          </div>
+
+          <div className="hover-hint-modern">
+            <span>Hover for details</span>
+            <span className="hover-arrow">→</span>
           </div>
         </div>
 
-        {/* Back Side - Detailed Information */}
+        {/* Back Side - Stats Grid */}
         <div className="card-back-modern">
           <div className="back-header-modern">
-            <h3 className="back-title-modern">📊 Detailed Information</h3>
+            <h3 className="back-title-modern">📊 Weather Details</h3>
             <p className="back-subtitle-modern">{city.cityName}</p>
           </div>
-          
-          <div className="details-grid-modern">
-            <div className="detail-item-modern">
-              <span className="detail-icon-modern">🌡️</span>
-              <div className="detail-content-modern">
-                <span className="detail-label-modern">High Temperature</span>
-                <span className="detail-value-modern">{convertTemp(city.tempMax)}&deg;{temperatureUnit}</span>
+
+          <div className="stats-grid-back">
+            <div className="stat-item-back">
+              <span className="stat-icon-back">🌡️</span>
+              <div className="stat-content-back">
+                <span className="stat-label-back">Feels Like</span>
+                <span className="stat-value-back">{convertTemp(city.feelsLike)}&deg;{temperatureUnit}</span>
               </div>
             </div>
-
-            <div className="detail-item-modern">
-              <span className="detail-icon-modern">❄️</span>
-              <div className="detail-content-modern">
-                <span className="detail-label-modern">Low Temperature</span>
-                <span className="detail-value-modern">{convertTemp(city.tempMin)}&deg;{temperatureUnit}</span>
+            
+            <div className="stat-item-back">
+              <span className="stat-icon-back">💧</span>
+              <div className="stat-content-back">
+                <span className="stat-label-back">Humidity</span>
+                <span className="stat-value-back">{city.humidity}%</span>
               </div>
             </div>
-
-            <div className="detail-item-modern">
-              <span className="detail-icon-modern">🎚️</span>
-              <div className="detail-content-modern">
-                <span className="detail-label-modern">Pressure</span>
-                <span className="detail-value-modern">{city.pressure} hPa</span>
+            
+            <div className="stat-item-back">
+              <span className="stat-icon-back">💨</span>
+              <div className="stat-content-back">
+                <span className="stat-label-back">Wind Speed</span>
+                <span className="stat-value-back">{city.windSpeed} m/s</span>
               </div>
             </div>
-
-            <div className="detail-item-modern">
-              <span className="detail-icon-modern">💧</span>
-              <div className="detail-content-modern">
-                <span className="detail-label-modern">Humidity</span>
-                <span className="detail-value-modern">{city.humidity}%</span>
+            
+            <div className="stat-item-back">
+              <span className="stat-icon-back">🎚️</span>
+              <div className="stat-content-back">
+                <span className="stat-label-back">Pressure</span>
+                <span className="stat-value-back">{city.pressure} hPa</span>
               </div>
             </div>
-
-            <div className="detail-item-modern">
-              <span className="detail-icon-modern">💨</span>
-              <div className="detail-content-modern">
-                <span className="detail-label-modern">Wind Speed</span>
-                <span className="detail-value-modern">{city.windSpeed} m/s</span>
-              </div>
-            </div>
-
-            <div className="detail-item-modern">
-              <span className="detail-icon-modern">🌡️</span>
-              <div className="detail-content-modern">
-                <span className="detail-label-modern">Feels Like</span>
-                <span className="detail-value-modern">{convertTemp(city.feelsLike)}&deg;{temperatureUnit}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="back-footer-modern">
-            <span className="back-hint-modern">Click ℹ to flip back</span>
           </div>
         </div>
       </div>

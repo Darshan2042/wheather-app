@@ -7,7 +7,6 @@ import React, { useState, useRef, useEffect } from 'react';
 
 const SearchBar = ({ onAddCity, loading, searchHistory = [] }) => {
   const [cityInput, setCityInput] = useState('');
-  const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [suggestions] = useState([
     'London', 'Paris', 'Tokyo', 'New York', 'Mumbai', 
@@ -21,31 +20,21 @@ const SearchBar = ({ onAddCity, loading, searchHistory = [] }) => {
     e.preventDefault();
     
     if (!cityInput.trim()) {
-      setMessage('Please enter a city name');
       return;
     }
 
-    setMessage('');
     setShowSuggestions(false);
 
     const result = await onAddCity(cityInput.trim());
     
     if (result.success) {
       setCityInput('');
-      setMessage(result.message);
-      
-      setTimeout(() => {
-        setMessage('');
-      }, 3000);
-    } else {
-      setMessage(result.message);
     }
   };
 
   const handleInputChange = (e) => {
     const value = e.target.value;
     setCityInput(value);
-    if (message) setMessage('');
     setShowSuggestions(value.length > 0 || (value.length === 0 && searchHistory.length > 0));
   };
 
@@ -196,15 +185,6 @@ const SearchBar = ({ onAddCity, loading, searchHistory = [] }) => {
       </button>
     </div>
 
-      {/* Message toast */}
-      {message && (
-        <div className={`search-toast ${message.includes('Failed') || message.includes('not found') ? 'error' : 'success'}`}>
-          <div className="toast-icon">
-            {message.includes('Failed') || message.includes('not found') ? '⚠️' : '✓'}
-          </div>
-          <span className="toast-message">{message}</span>
-        </div>
-      )}
     </div>
   );
 };
