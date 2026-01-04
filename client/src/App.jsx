@@ -171,36 +171,6 @@ function App() {
     });
   }, [state.cities, convertTemp, temperatureUnit]);
 
-  // Apply theme on mount
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  // Fetch all cities on component mount
-  useEffect(() => {
-    fetchCities();
-  }, [fetchCities]);
-
-  // Auto-refresh every 10 minutes with progress
-  useEffect(() => {
-    const autoRefreshInterval = setInterval(() => {
-      console.log('Auto-refreshing weather data...');
-      fetchCities();
-    }, 10 * 60 * 1000); // 10 minutes
-
-    // Update progress every second
-    const progressInterval = setInterval(() => {
-      const elapsed = Date.now() - state.lastRefresh.getTime();
-      const progress = (elapsed / (10 * 60 * 1000)) * 100;
-      setRefreshProgress(Math.min(progress, 100));
-    }, 1000);
-
-    return () => {
-      clearInterval(autoRefreshInterval);
-      clearInterval(progressInterval);
-    };
-  }, [state.lastRefresh, fetchCities]);
-
   /**
    * Fetch all saved cities from the backend
    */
@@ -232,6 +202,36 @@ function App() {
       dispatch({ type: ACTION_TYPES.SET_LOADING, payload: false });
     }
   }, []);
+
+  // Apply theme on mount
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  // Fetch all cities on component mount
+  useEffect(() => {
+    fetchCities();
+  }, [fetchCities]);
+
+  // Auto-refresh every 10 minutes with progress
+  useEffect(() => {
+    const autoRefreshInterval = setInterval(() => {
+      console.log('Auto-refreshing weather data...');
+      fetchCities();
+    }, 10 * 60 * 1000); // 10 minutes
+
+    // Update progress every second
+    const progressInterval = setInterval(() => {
+      const elapsed = Date.now() - state.lastRefresh.getTime();
+      const progress = (elapsed / (10 * 60 * 1000)) * 100;
+      setRefreshProgress(Math.min(progress, 100));
+    }, 1000);
+
+    return () => {
+      clearInterval(autoRefreshInterval);
+      clearInterval(progressInterval);
+    };
+  }, [state.lastRefresh, fetchCities]);
 
   /**
    * Handle adding a new city
