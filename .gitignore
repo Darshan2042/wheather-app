@@ -12,6 +12,7 @@ client/node_modules/
 # Production build
 client/build/
 dist/
+.vercel
 
 # Logs
 npm-debug.log*
