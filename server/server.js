@@ -56,18 +56,29 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Root endpoint
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Weather App API',
-    version: '1.0.0',
-    endpoints: {
-      health: '/api/health',
-      weather: '/api/weather',
-      documentation: '/api/weather (supports GET, POST, DELETE)'
-    }
+// Serve static assets in production
+if (process.env.NODE_ENV === 'production') {
+  // Set static folder
+  app.use(express.static(path.join(__dirname, '../client/build')));
+
+  // Serve React app for any route not caught by API
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
   });
-});
+} else {
+  // Root endpoint for development
+  app.get('/', (req, res) => {
+    res.json({
+      message: 'Weather App API',
+      version: '1.0.0',
+      endpoints: {
+        health: '/api/health',
+        weather: '/api/weather',
+        documentation: '/api/weather (supports GET, POST, DELETE)'
+      }
+    });
+  });
+}
 
 // Error handling middleware (must be last)
 app.use(errorHandler);
