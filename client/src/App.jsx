@@ -179,7 +179,7 @@ function App() {
   // Fetch all cities on component mount
   useEffect(() => {
     fetchCities();
-  }, []);
+  }, [fetchCities]);
 
   // Auto-refresh every 10 minutes with progress
   useEffect(() => {
@@ -199,7 +199,7 @@ function App() {
       clearInterval(autoRefreshInterval);
       clearInterval(progressInterval);
     };
-  }, [state.lastRefresh]);
+  }, [state.lastRefresh, fetchCities]);
 
   /**
    * Fetch all saved cities from the backend

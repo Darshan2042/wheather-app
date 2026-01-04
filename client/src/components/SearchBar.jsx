@@ -3,7 +3,7 @@
  * Advanced search with animations and suggestions
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 
 const SearchBar = ({ onAddCity, loading, searchHistory = [] }) => {
   const [cityInput, setCityInput] = useState('');

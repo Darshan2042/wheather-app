@@ -4,7 +4,6 @@
  */
 
 import React, { useState, useEffect, useMemo, useCallback, memo, useContext } from 'react';
-import { getWeatherIcon, getWeatherGradient } from '../utils/weatherIcons';
 import { WeatherContext } from '../App';
 
 const WeatherCard = memo(({ city, onDelete, index }) => {
