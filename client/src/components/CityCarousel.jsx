@@ -1,99 +1,73 @@
 /**
  * CityCarousel Component
- * Horizontal scrollable container for weather cards
+ * Grid layout for weather cards
  */
 
-import React, { useRef } from 'react';
+import React, { useMemo } from 'react';
 import WeatherCard from './WeatherCard';
 
 const CityCarousel = ({ cities, onDeleteCity, onRefresh }) => {
-  const carouselRef = useRef(null);
+  const [sortBy, setSortBy] = React.useState('default'); // 'default', 'temp', 'name'
 
-  /**
-   * Handle scroll left
-   */
-  const scrollLeft = () => {
-    if (carouselRef.current) {
-      carouselRef.current.scrollBy({
-        left: -400,
-        behavior: 'smooth'
-      });
+  // Memoized sorted cities
+  const sortedCities = useMemo(() => {
+    const citiesCopy = [...cities];
+    switch (sortBy) {
+      case 'temp':
+        return citiesCopy.sort((a, b) => parseFloat(b.temperature) - parseFloat(a.temperature));
+      case 'name':
+        return citiesCopy.sort((a, b) => a.cityName.localeCompare(b.cityName));
+      default:
+        return citiesCopy;
     }
-  };
-
-  /**
-   * Handle scroll right
-   */
-  const scrollRight = () => {
-    if (carouselRef.current) {
-      carouselRef.current.scrollBy({
-        left: 400,
-        behavior: 'smooth'
-      });
-    }
-  };
+  }, [cities, sortBy]);
 
   return (
-    <div className="carousel-container">
-      {/* Carousel header */}
-      <div className="carousel-header">
-        <div className="carousel-title">
-          <h2>Your Cities</h2>
-          <span className="city-count">{cities.length} {cities.length === 1 ? 'city' : 'cities'}</span>
+    <div className="carousel-container-modern">
+      {/* Header */}
+      <div className="carousel-header-modern">
+        <div className="carousel-title-modern">
+          <h2 className="title-gradient">Your Cities</h2>
+          <span className="city-count-modern">
+            {cities.length} {cities.length === 1 ? 'city' : 'cities'}
+          </span>
         </div>
-        <button 
-          className="refresh-button"
-          onClick={onRefresh}
-          title="Refresh weather data"
-        >
-          <span className="refresh-icon">🔄</span>
-          Refresh
-        </button>
+        
+        <div className="carousel-controls-modern">
+          {/* Sort dropdown */}
+          <select 
+            className="sort-select-modern"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+          >
+            <option value="default">Default Order</option>
+            <option value="temp">By Temperature</option>
+            <option value="name">By Name</option>
+          </select>
+
+          {/* Refresh button */}
+          <button 
+            className="refresh-button-modern"
+            onClick={onRefresh}
+            title="Refresh weather data"
+          >
+            <span className="refresh-icon-modern">🔄</span>
+            Refresh
+          </button>
+        </div>
       </div>
 
-      {/* Carousel with scroll buttons */}
-      <div className="carousel-wrapper">
-        {/* Left scroll button */}
-        {cities.length > 1 && (
-          <button 
-            className="scroll-button scroll-left"
-            onClick={scrollLeft}
-            aria-label="Scroll left"
-          >
-            ‹
-          </button>
-        )}
-
-        {/* Scrollable card container */}
-        <div className="carousel" ref={carouselRef}>
-          {cities.map((city) => (
-            <WeatherCard 
-              key={city._id} 
-              city={city}
-              onDelete={onDeleteCity}
-            />
-          ))}
-        </div>
-
-        {/* Right scroll button */}
-        {cities.length > 1 && (
-          <button 
-            className="scroll-button scroll-right"
-            onClick={scrollRight}
-            aria-label="Scroll right"
-          >
-            ›
-          </button>
-        )}
+      {/* Grid view */}
+      <div className="cards-grid-modern">
+        {sortedCities.map((city, index) => (
+          <WeatherCard 
+            key={city._id} 
+            city={city}
+            index={index}
+            onDelete={onDeleteCity}
+          />
+        ))}
       </div>
-
-      {/* Scroll hint */}
-      {cities.length > 2 && (
-        <div className="scroll-hint">
-          <span className="hint-icon">👆</span>
-          Scroll or use arrow buttons to see more cities
-        </div>
-      )}
     </div>
   );
 };
