@@ -6,9 +6,18 @@
 
 import axios from 'axios';
 
-// OpenWeatherMap API configuration
-const WEATHER_API_KEY = process.env.REACT_APP_OPENWEATHER_API_KEY || '7e1e5bf7766e63e8cc4daa6f37f6e85d';
-const WEATHER_API_BASE = 'https://api.openweathermap.org/data/2.5';
+// Base URL for API requests
+const API_BASE_URL = process.env.REACT_APP_API_URL || 
+                     (process.env.NODE_ENV === 'production' ? '/api' : 'http://localhost:5000/api');
+
+// Create axios instance with default config
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  timeout: 10000 // 10 seconds
+});
 
 // SessionStorage key for cities
 const CITIES_STORAGE_KEY = 'weatherAppCities';
@@ -40,54 +49,21 @@ const saveCitiesToStorage = (cities) => {
 };
 
 /**
- * Fetch weather data from OpenWeatherMap API
+ * Fetch weather data from backend API
  * @param {string} cityName - Name of the city
  * @returns {Promise<Object>} Weather data
  */
-const fetchWeatherFromAPI = async (cityName) => {
+const fetchWeatherFromBackend = async (cityName) => {
   try {
-    const url = `${WEATHER_API_BASE}/weather?q=${encodeURIComponent(cityName)}&appid=${WEATHER_API_KEY}&units=metric`;
-    const response = await axios.get(url);
-    return response.data;
+    const response = await api.get(`/weather/${encodeURIComponent(cityName)}`);
+    return response.data.data;
   } catch (error) {
     console.error('Weather API Error:', error);
     if (error.response?.status === 404) {
       throw new Error('City not found');
-    } else if (error.response?.status === 401) {
-      throw new Error('Invalid API key');
     }
     throw new Error(error.response?.data?.message || 'Failed to fetch weather data');
   }
-};
-
-/**
- * Format weather data for frontend
- * @param {Object} data - Raw weather data from API
- * @returns {Object} Formatted weather data
- */
-const formatWeatherData = (data) => {
-  return {
-    cityName: data.name,
-    country: data.sys.country,
-    temperature: Math.round(data.main.temp),
-    feelsLike: Math.round(data.main.feels_like),
-    condition: data.weather[0].main,
-    description: data.weather[0].description,
-    icon: data.weather[0].icon,
-    humidity: data.main.humidity,
-    windSpeed: data.wind.speed,
-    tempMax: Math.round(data.main.temp_max),
-    tempMin: Math.round(data.main.temp_min),
-    pressure: data.main.pressure,
-    coordinates: {
-      lat: data.coord.lat,
-      lon: data.coord.lon
-    },
-    sunrise: data.sys.sunrise,
-    sunset: data.sys.sunset,
-    timezone: data.timezone,
-    timestamp: Date.now()
-  };
 };
 
 /**
@@ -98,14 +74,17 @@ export const getAllCities = async () => {
   try {
     const cities = getCitiesFromStorage();
     
-    // Fetch fresh weather data for each city
+    if (cities.length === 0) {
+      return [];
+    }
+    
+    // Fetch fresh weather data for each city from backend
     const weatherPromises = cities.map(async (city) => {
       try {
-        const weatherData = await fetchWeatherFromAPI(city.cityName);
-        const formatted = formatWeatherData(weatherData);
+        const weatherData = await fetchWeatherFromBackend(city.cityName);
         return {
           ...city,
-          ...formatted,
+          ...weatherData,
         };
       } catch (error) {
         console.error(`Error fetching weather for ${city.cityName}:`, error.message);
@@ -132,8 +111,7 @@ export const getAllCities = async () => {
  */
 export const getWeatherByCity = async (cityName) => {
   try {
-    const weatherData = await fetchWeatherFromAPI(cityName);
-    return formatWeatherData(weatherData);
+    return await fetchWeatherFromBackend(cityName);
   } catch (error) {
     console.error(`Error fetching weather for ${cityName}:`, error);
     throw error;
@@ -147,16 +125,15 @@ export const getWeatherByCity = async (cityName) => {
  */
 export const addCity = async (cityName) => {
   try {
-    // Fetch weather data first to validate the city
-    const weatherData = await fetchWeatherFromAPI(cityName);
-    const formatted = formatWeatherData(weatherData);
+    // Fetch weather data from backend to validate the city
+    const weatherData = await fetchWeatherFromBackend(cityName);
     
-    // Get existing cities
+    // Get existing cities from sessionStorage
     const cities = getCitiesFromStorage();
     
     // Check if city already exists
     const existingCity = cities.find(
-      city => city.cityName.toLowerCase() === formatted.cityName.toLowerCase()
+      city => city.cityName.toLowerCase() === weatherData.cityName.toLowerCase()
     );
     
     if (existingCity) {
@@ -166,11 +143,11 @@ export const addCity = async (cityName) => {
     // Create new city object with unique ID
     const newCity = {
       _id: `${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      ...formatted,
+      ...weatherData,
       savedAt: new Date().toISOString()
     };
     
-    // Add to storage
+    // Add to sessionStorage
     const updatedCities = [...cities, newCity];
     saveCitiesToStorage(updatedCities);
     
@@ -212,17 +189,16 @@ export const refreshCityWeather = async (cityId) => {
       throw new Error('City not found');
     }
     
-    // Fetch fresh weather data
-    const weatherData = await fetchWeatherFromAPI(city.cityName);
-    const formatted = formatWeatherData(weatherData);
+    // Fetch fresh weather data from backend
+    const weatherData = await fetchWeatherFromBackend(city.cityName);
     
     // Update the city in storage
     const updatedCities = cities.map(c => 
-      c._id === cityId ? { ...c, ...formatted } : c
+      c._id === cityId ? { ...c, ...weatherData } : c
     );
     saveCitiesToStorage(updatedCities);
     
-    return { ...city, ...formatted };
+    return { ...city, ...weatherData };
   } catch (error) {
     console.error(`Error refreshing city ${cityId}:`, error);
     throw error;
